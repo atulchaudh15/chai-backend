@@ -1,3 +1,5 @@
+//ye ek custom class bnayi h hmne jo error class ko extend krti h aur
+//jo professional tareeke s api error response ko handle krti h 
 class ApiError extends Error{
     constructor(
         statusCode,
