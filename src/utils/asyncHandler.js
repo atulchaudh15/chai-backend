@@ -23,8 +23,8 @@
 //METHOD-2
 //ye wala promise ko use krke kiya h 
 const asyncHandler= (requestHandler)=> {
-    (req,res,next) => {
-        Promise.resolve().
+    return (req,res,next) => {
+        Promise.resolve(requestHandler(req,res,next)).
         catch((err) => next(err))
     }
 }
