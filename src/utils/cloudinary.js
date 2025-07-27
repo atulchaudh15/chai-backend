@@ -10,7 +10,10 @@ cloudinary.config({
 const uploadOnCloudinary= async (localFilePath) => {
     try {
         //agr file path present nhi h to null return krdo
-        if(!localFilePath) return null
+        if(!localFilePath){
+            console.log("File path invalid or not provided.");
+            return null;
+        }
        //upload file on cloudinary
        const response= await cloudinary.uploader.upload(localFilePath, {
          resource_type: "auto"
