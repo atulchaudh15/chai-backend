@@ -1,10 +1,10 @@
-import {v2 as cloudinary} from "cloudinary";
+import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 
-cloudinary.config({ 
+/*cloudinary.config({ 
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
-  api_key: CLOUDINARY_API_KEY, 
-  api_secret: CLOUDINARY_API_SECRET
+  api_key: process.env.CLOUDINARY_API_KEY, 
+  api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
 const uploadOnCloudinary= async (localFilePath) => {
@@ -30,10 +30,86 @@ const uploadOnCloudinary= async (localFilePath) => {
     }
 
 
-}
+} */
+
+  /*  
+// Step 1: Cloudinary Config
+cloudinary.config({ 
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+  api_key: process.env.CLOUDINARY_API_KEY, 
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Step 2: Upload Function
+const uploadOnCloudinary = async (localFilePath) => {
+  try {
+    if (!localFilePath) {
+      console.log("❌ File path invalid or not provided.");
+      return null;
+    }
+
+    // Step 3: Upload File
+    const response = await cloudinary.uploader.upload(localFilePath, {
+      resource_type: "auto",
+    });
+
+    console.log("✅ File uploaded successfully:", response.url);
+
+    // Step 4: Delete Local Temp File
+    if (fs.existsSync(localFilePath)) {
+      fs.unlinkSync(localFilePath);
+    }
+
+    return response;
+
+  } catch (error) {
+    console.error("❌ Cloudinary upload error:", error);
+
+    if (fs.existsSync(localFilePath)) {
+      fs.unlinkSync(localFilePath);
+    }
+
+    return null;
+  }
+};
+
+
 
 export {uploadOnCloudinary}
 
+*/
+
+
+// src/utils/cloudinary.js
+import dotenv from "dotenv";
+
+dotenv.config();  // 👈 isko lagana zaroori hai agar yeh file directly run ho rahi ho
+
+cloudinary.config({ 
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
+  api_key: process.env.CLOUDINARY_API_KEY, 
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const uploadOnCloudinary = async (localFilePath) => {
+  try {
+    if (!localFilePath) return null;
+
+    const response = await cloudinary.uploader.upload(localFilePath, {
+      resource_type: "auto",
+    });
+    console.log("✅ Uploaded to Cloudinary:", response.url);
+
+    return response;
+  } catch (error) {
+    console.error("❌ Cloudinary upload error:", error);
+    return null;
+  } finally {
+    fs.unlinkSync(localFilePath); // Always remove temp file
+  }
+};
+
+export { uploadOnCloudinary };
 
 
 

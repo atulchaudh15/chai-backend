@@ -3,6 +3,8 @@ import { ApiError } from "../utils/ApiError.js";
 import {User} from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
+import path from "path";
+
 
 const registerUser= asyncHandler (async (req,res) => {
       //get user details from frontend
@@ -14,7 +16,8 @@ const registerUser= asyncHandler (async (req,res) => {
       //remove password and refresh token field from response
       //check for user creation
       //return res
-     
+      console.log("📂 req.files =>", req.files)
+      console.log("📝 req.body =>", req.body)
       const {fullname, email, username,password}= req.body
       console.log("email: ", email);
       
@@ -23,13 +26,13 @@ const registerUser= asyncHandler (async (req,res) => {
        throw new ApiError(400, "fullname is required")
       }*/
       if(
-        [fullname,email,username,password].some(()=> 
+        [fullname,email,username,password].some((field)=> 
         field?.trim()==="")
       ){
         throw new ApiError(400, "All fields are required")
       }
       
-      const existedUser= User.findOne({
+      const existedUser= await User.findOne({
         //isse ek saath hm ek s jyada ko check kr skte h
         $or: [{username}, {email}]
       })
@@ -39,23 +42,39 @@ const registerUser= asyncHandler (async (req,res) => {
       }
       //ye files option multiple files k liye use kiya h jo multer ki help s mila h
       // ? ka mtlb h ki hm check kr rhe h ki files ka access h ya ni
-      //avatar file ka name h 
-      const avatarLocalPath= req.files?.avatar[0]?.path
+      //avatar file ka name h
+      
+      
+      const avatarFile = req.files?.avatar?.[0];
+      if (!avatarFile) throw new ApiError(400, "Avatar file is required");
+
+      const avatarLocalPath = path.resolve(avatarFile.path);
+      console.log("📍 Uploading Avatar:", avatarLocalPath);
+
+      const avatar = await uploadOnCloudinary(avatarLocalPath);
+      if (!avatar) throw new ApiError(500, "Avatar upload failed");
+
+      console.log("✅ Avatar Uploaded:", avatar.url);
+
+      //const avatarLocalPath= req.files?.avatar[0]?.path
       const coverImageLocalPath= req.files?.coverImage[0]?.path
       
-      if(!avatarLocalPath){
-        throw new ApiError(400, "Avatar file is required")
-      }
+      //if(!avatarLocalPath){
+      //  throw new ApiError(400, "Avatar file is required")
+      //}
       //if(!coverImageLocalPath){
       //  throw new ApiError(400, "cover image file is required")
       //}
       
-      const avatar= await uploadOnCloudinary(avatarLocalPath)
+      //const avatar= await uploadOnCloudinary(avatarLocalPath)
       const coverImage= await uploadOnCloudinary(coverImageLocalPath)
       
-      if(!avatar){
-        throw new ApiError(400, "Avatar file is required")
-      }
+      //const avatarFile = req.files?.avatar;
+
+      //if (!avatarFile || avatarFile.length === 0) {
+       // throw new ApiError(400, "Avatar file is required");
+      //}
+
       //ye db s baat krega aur user ko register krega
       const user= await User.create({
         fullname,
