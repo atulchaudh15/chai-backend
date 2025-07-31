@@ -11,6 +11,12 @@ const userSchema= new mongoose.Schema({
     trim: true,
     index: true,
    },
+   email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true
+  },
    fullname:{
     type: String,
     required: true,
@@ -53,10 +59,10 @@ userSchema.pre("save",  async function (next){
     next();    
 })
 
-userSchema.methods.isPasswordCorrect= async function(){
+userSchema.methods.isPasswordCorrect= async function(inputPassword){
     //ye pass jo put kiya h aur jo encrypted h un dono ko comapre krega
     //aur true ya false return krega
-    return await bcrypt.compare(password, this.password)
+    return await bcrypt.compare(inputPassword, this.password)
 }
 
 userSchema.methods.generateAccessToken= function(){
